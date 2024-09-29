@@ -1,0 +1,22 @@
+services:
+  app:
+    container_name: application-layer
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - '8080:8080'
+    tty: true
+    command: bash
+  db:
+    container_name: database-layer
+    image: postgres:17.0-alpine
+    ports:
+      - '5432:5432'
+    volumes:
+      - night-chat-volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'postgres'
+volumes:
+  night-chat-volume:
