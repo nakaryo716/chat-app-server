@@ -1,22 +1,31 @@
 services:
   app:
-    container_name: application-layer
+    container_name: api
     build: 
       dockerfile: Dockerfile
       context: .
     ports:
       - '8080:8080'
+    networks: 
+      - "night-chat-network"
     tty: true
     command: bash
+    depends_on:
+      - "db"
   db:
-    container_name: database-layer
+    container_name: database
     image: postgres:17.0-alpine
     ports:
-      - '5432:5432'
+      - '15432:5432'
+    networks: 
+      - "night-chat-network"
     volumes:
       - night-chat-volume:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: 'user'
+      POSTGRES_USER: 'pg-user'
       POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DATABASE: 'night_chat_database'
 volumes:
   night-chat-volume:
+networks:
+  night-chat-network:
