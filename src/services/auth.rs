@@ -63,8 +63,8 @@ impl Claims {
         Self {
             iss: "http://localhost:8080".to_string(),
             sub: "AccessToken".to_string(),
-            user_id: user_info.user_id,
-            user_name: user_info.user_name,
+            user_id: user_info.get_user_id().to_owned(),
+            user_name: user_info.get_user_name().to_owned(),
             exp: 2000000000,
         }
     }

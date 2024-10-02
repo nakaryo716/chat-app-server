@@ -12,7 +12,7 @@ pub struct Error{}
 
 pub fn create_room(db: &RoomDb, payload: CreateRoom, user_info: PubUserInfo) -> Result<RoomInfo, RoomError>{
     // TODO: ルーム名のバリデーションを行う
-    let room = init_room(&payload.room_name, &user_info.user_id);
+    let room = init_room(&payload.room_name, user_info.get_user_id());
     db.open_new_room(room.clone()).map_err(|e| e)?;
     Ok(room.get_room_info().to_owned())
 }
@@ -31,7 +31,7 @@ pub fn delete_owner_room(db: &RoomDb, room_id: &str, user_info: PubUserInfo) -> 
     let room = db.listen_room(room_id).map_err(|_| Error{})?;
     let room_owner = room.get_room_info().get_created_by();
 
-    if room_owner == user_info.user_id {
+    if room_owner == user_info.get_user_id() {
         db.delete_room(room_id).map_err(|_| Error{})
     } else {
         Err(Error{})
