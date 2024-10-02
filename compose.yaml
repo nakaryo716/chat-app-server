@@ -9,7 +9,7 @@ services:
     networks: 
       - "night-chat-network"
     tty: true
-    command: bash
+    command: make
     depends_on:
       - "db"
   db:
