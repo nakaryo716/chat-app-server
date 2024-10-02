@@ -1,10 +1,10 @@
-.DEFAULT_GOAL :=migrate 
+.DEFAULT_GOAL := run
 
-install:
-		cargo install sqlx-cli
-
-create_database: install
+create_database:
 		sqlx database create
 
 migrate: create_database
 		sqlx migrate run
+
+run: migrate
+		cargo run
