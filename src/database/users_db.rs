@@ -2,6 +2,7 @@ use axum::async_trait;
 use sqlx::PgPool;
 use crate::models::user_model::{PubUserInfo, User};
 
+#[derive(Debug, Clone)]
 pub struct UserDb {
     pool: PgPool,
 }
