@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use tokio::sync::broadcast::Sender;
 
 #[derive(Debug, Clone)]
@@ -34,5 +35,16 @@ impl Room {
 
     pub fn get_sender(&self) -> Sender<String> {
         self.sender.clone()
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateRoom {
+    room_name: String,
+}
+
+impl CreateRoom {
+    pub fn get_room_name(&self) -> &str {
+        &self.room_name
     }
 }
