@@ -20,7 +20,7 @@ impl User {
             user_pass: payload.user_pass,
         }
     }
-    
+
     pub fn get_user_id(&self) -> &str {
         &self.user_id
     }
@@ -33,7 +33,6 @@ impl User {
     pub fn get_user_pass(&self) -> &str {
         &self.user_pass
     }
-
 }
 #[derive(Debug, Clone, Serialize, FromRow)]
 pub struct PubUserInfo {
@@ -42,12 +41,6 @@ pub struct PubUserInfo {
 }
 
 impl PubUserInfo {
-    pub fn new(user_id: String, user_name: String) -> Self {
-        Self {
-            user_id,
-            user_name,
-        }
-    }
     pub fn get_user_id(&self) -> &str {
         &self.user_id
     }
