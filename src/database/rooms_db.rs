@@ -1,32 +1,57 @@
+use crate::models::rooms_model::{Room, RoomInfo};
 use std::{
     collections::HashMap,
-    sync::{Arc, Mutex, MutexGuard},
+    sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
-
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
-use crate::models::rooms_model::{Room, RoomInfo};
-
+// ユーザーが開設したチャットルームのメタ情報及びtokio::bradcastのチャンネルを保持して使えるようにする構造体
 pub struct RoomDb {
-    pool: Arc<Mutex<HashMap<String, Room>>>,
-}
-
-pub enum RoomError {
-    DbError,
-    IdNotFound,
+    pool: Arc<RwLock<HashMap<String, Room>>>,
 }
 
 impl RoomDb {
-    pub fn open_new_room(&self, room: Room) -> Result<(), RoomError> {
-        let mut gurad = get_lock(&self).map_err(|e| e)?;
-        gurad.insert(room.get_room_info().get_room_id().to_string(), room);
+    pub fn new() -> Self {
+        Self {
+            pool: Arc::default(),
+        }
+    }
+}
 
-        Ok(())
+// RoomDbに保持されているデータ管理を行うTrait
+pub trait RoomManage {
+    type Info;
+    type Data;
+    type Error;
+    fn open_new_room(
+        &self,
+        room_name: &str,
+        created_by_id: &str,
+    ) -> Result<Self::Info, Self::Error>;
+    fn listen_room(&self, room_id: &str) -> Result<Self::Data, Self::Error>;
+    fn delete_room(&self, room_id: &str) -> Result<(), Self::Error>;
+}
+
+impl RoomManage for RoomDb {
+    type Info = RoomInfo;
+    type Data = Room;
+    type Error = RoomError;
+    fn open_new_room(
+        &self,
+        room_name: &str,
+        created_by_id: &str,
+    ) -> Result<Self::Info, Self::Error> {
+        let room = init_room(room_name, created_by_id);
+        let mut gurad = get_write_lock(&self).map_err(|e| e)?;
+        gurad.insert(room.get_room_info().get_room_id().to_string(), room.clone());
+
+        Ok(room.get_room_info().to_owned())
     }
 
-    pub fn listen_room(&self, room_id: &str) -> Result<Room, RoomError> {
-        let room = get_lock(&self).and_then(|guard| {
+    // ルーム作成者以外の人がチャットルームに参加するためのメソッド
+    fn listen_room(&self, room_id: &str) -> Result<Self::Data, Self::Error> {
+        let room = get_read_lock(&self).and_then(|guard| {
             guard
                 .get(room_id)
                 .map(|e| e.to_owned())
@@ -35,15 +60,17 @@ impl RoomDb {
         Ok(room)
     }
 
-    pub fn delete_room(&self, room_id: &str) -> Result<(), RoomError>{
-        let _ = get_lock(&self).and_then(|mut gurad|{
-            gurad.remove(room_id).ok_or_else(|| RoomError::IdNotFound)
-        });
+    // ルームを削除するメソッド
+    fn delete_room(&self, room_id: &str) -> Result<(), Self::Error> {
+        let _ = get_write_lock(&self)
+            .and_then(|mut gurad| gurad.remove(room_id).ok_or_else(|| RoomError::IdNotFound));
         Ok(())
     }
 }
 
-pub fn init_room(room_name: &str, created_by_id: &str) -> Room {
+// ユニークIDを割り振る
+// チャンネルの作成を行う
+fn init_room(room_name: &str, created_by_id: &str) -> Room {
     let (sender, _) = broadcast::channel(128);
 
     Room {
@@ -56,7 +83,17 @@ pub fn init_room(room_name: &str, created_by_id: &str) -> Room {
     }
 }
 
-fn get_lock(db: &RoomDb) -> Result<MutexGuard<HashMap<String, Room>>, RoomError> {
-    let lock = db.pool.lock().map_err(|_| RoomError::DbError)?;
+fn get_write_lock(db: &RoomDb) -> Result<RwLockWriteGuard<HashMap<String, Room>>, RoomError> {
+    let lock = db.pool.write().map_err(|_| RoomError::DbError)?;
     Ok(lock)
+}
+
+fn get_read_lock(db: &RoomDb) -> Result<RwLockReadGuard<HashMap<String, Room>>, RoomError> {
+    let lock = db.pool.read().map_err(|_| RoomError::DbError)?;
+    Ok(lock)
+}
+
+pub enum RoomError {
+    DbError,
+    IdNotFound,
 }

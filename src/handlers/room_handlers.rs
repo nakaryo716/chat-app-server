@@ -5,10 +5,9 @@
 // roomのidを取得する
 // statuscode okとjson形式でidを渡す
 
+use crate::{database::rooms_db::RoomDb, models::rooms_model::CreateRoom};
 use axum::{extract::State, response::IntoResponse, Json};
 use http::StatusCode;
-
-use crate::{database::rooms_db::RoomDb, services::rooms::{create_room, CreateRoom}};
 
 async fn create_room_handler(
     State(room_db): State<RoomDb>,

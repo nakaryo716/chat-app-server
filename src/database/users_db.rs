@@ -1,6 +1,6 @@
+use crate::models::user_model::{PubUserInfo, User};
 use axum::async_trait;
 use sqlx::PgPool;
-use crate::models::user_model::{PubUserInfo, User};
 
 #[derive(Debug, Clone)]
 pub struct UserDb {
@@ -9,8 +9,8 @@ pub struct UserDb {
 
 impl UserDb {
     pub async fn connect(database_url: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let pool = PgPool::connect(database_url).await.map_err(|e|e)?;
-        Ok(Self {pool})
+        let pool = PgPool::connect(database_url).await.map_err(|e| e)?;
+        Ok(Self { pool })
     }
 }
 
@@ -27,7 +27,7 @@ pub trait UserDbManage<User, Id> {
 impl UserDbManage<User, String> for UserDb {
     type UserInfo = PubUserInfo;
     type Error = sqlx::error::Error;
-    
+
     async fn insert_new_user(&self, user: User) -> Result<Self::UserInfo, Self::Error> {
         let data: PubUserInfo = sqlx::query_as(
             r#"
@@ -35,7 +35,7 @@ impl UserDbManage<User, String> for UserDb {
             (user_id, user_name, user_mail, user_pass)
             VALUES ($1, $2, $3, $4)
             RETURNING user_id, user_name
-            "#
+            "#,
         )
         .bind(user.get_user_id())
         .bind(user.get_user_name())
@@ -43,22 +43,22 @@ impl UserDbManage<User, String> for UserDb {
         .bind(user.get_user_pass())
         .fetch_one(&self.pool)
         .await
-        .map_err(|e|e)?;
+        .map_err(|e| e)?;
 
         Ok(data)
     }
 
     async fn delete_user(&self, user_id: String) -> Result<(), Self::Error> {
-        let data = sqlx::query(
+        sqlx::query(
             r#"
             DELETE FROM user_data
             WHERE user_id = $1
-            "#
+            "#,
         )
         .bind(user_id)
         .execute(&self.pool)
         .await
-        .map_err(|e|e)?;
+        .map_err(|e| e)?;
         Ok(())
     }
 }
@@ -70,12 +70,12 @@ pub trait UserDataViewer<Id, Mail> {
     type PassWord;
     type Error;
     async fn get_user_data(&self, user_id: Id) -> Result<Self::FullUserData, Self::Error>;
-    async fn get_user_info_id(&self,user_id: Id) -> Result<Self::UserInfo, Self::Error>;
+    async fn get_user_info_id(&self, user_id: Id) -> Result<Self::UserInfo, Self::Error>;
     async fn get_user_info_mail(&self, user_mail: Mail) -> Result<Self::UserInfo, Self::Error>;
 }
 
 #[async_trait]
-impl UserDataViewer<String, String> for UserDb{
+impl UserDataViewer<String, String> for UserDb {
     type FullUserData = User;
     type UserInfo = PubUserInfo;
     type PassWord = String;
@@ -87,7 +87,7 @@ impl UserDataViewer<String, String> for UserDb{
             SELECT user_id, user_name, user_mail, user_pass
             FROM user_data
             WHERE user_id = $1
-            "#
+            "#,
         )
         .bind(user_id)
         .fetch_one(&self.pool)
@@ -97,12 +97,12 @@ impl UserDataViewer<String, String> for UserDb{
         Ok(data)
     }
 
-    async fn get_user_info_id(&self,user_id: String) -> Result<Self::UserInfo, Self::Error> {
+    async fn get_user_info_id(&self, user_id: String) -> Result<Self::UserInfo, Self::Error> {
         let data: PubUserInfo = sqlx::query_as(
             r#"
             SELECT user_id, user_name FROM user_data
             WHERE user_id = $1
-            "#
+            "#,
         )
         .bind(user_id)
         .fetch_one(&self.pool)
@@ -116,7 +116,7 @@ impl UserDataViewer<String, String> for UserDb{
             r#"
             SELECT user_id, user_name FROM user_data
             WHERE user_mail = $1
-            "#
+            "#,
         )
         .bind(user_mail)
         .fetch_one(&self.pool)
@@ -128,9 +128,9 @@ impl UserDataViewer<String, String> for UserDb{
 
 #[cfg(test)]
 mod test {
-    use rand::random;
-    use crate::models::user_model::CreateUserPayload;
     use super::*;
+    use crate::models::user_model::CreateUserPayload;
+    use rand::random;
 
     async fn set_up_db() -> UserDb {
         let url = dotenvy::var("DATABASE_URL").unwrap();
@@ -139,7 +139,7 @@ mod test {
 
     fn gen_random_user() -> User {
         let random_num = random::<f64>();
-        let payload= CreateUserPayload {
+        let payload = CreateUserPayload {
             user_name: format!("test-user-name{}", random_num),
             user_mail: format!("test-user-mail{}", random_num),
             user_pass: format!("test-user-pass{}", random_num),
@@ -159,7 +159,9 @@ mod test {
         assert_eq!(res_user_info.get_user_name(), new_user.get_user_name());
 
         // 削除
-        db.delete_user(res_user_info.get_user_id().to_string()).await.unwrap();
+        db.delete_user(res_user_info.get_user_id().to_string())
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
@@ -170,26 +172,33 @@ mod test {
         let res_user_info = db.insert_new_user(new_user.clone()).await.unwrap();
 
         // テスト対象
-        db.delete_user(res_user_info.get_user_id().to_string()).await.unwrap();
+        db.delete_user(res_user_info.get_user_id().to_string())
+            .await
+            .unwrap();
 
         // 再度クエリし、エラーが返ることを確認する
         // エラーはRowNotFoundになる
-        let query_result = db.get_user_data(res_user_info.get_user_id().to_string()).await;
+        let query_result = db
+            .get_user_data(res_user_info.get_user_id().to_string())
+            .await;
         match query_result {
             Ok(_) => {
                 panic!("Expect Row Not Found");
-            },
+            }
             Err(e) => {
                 // sqlx::error::ErrorがPartialEqを実装していない
                 // thisErrorが実装されているため、そこで記述されているFmtを比較する
-                let err_txt= e.to_string();
-                let sqlx_error_msg = "no rows returned by a query that expected to return at least one row";
+                let err_txt = e.to_string();
+                let sqlx_error_msg =
+                    "no rows returned by a query that expected to return at least one row";
                 assert_eq!(err_txt, sqlx_error_msg);
             }
         }
 
         // 削除
-        db.delete_user(res_user_info.get_user_id().to_string()).await.unwrap();
+        db.delete_user(res_user_info.get_user_id().to_string())
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
@@ -200,11 +209,16 @@ mod test {
         let res_user_info = db.insert_new_user(new_user.clone()).await.unwrap();
 
         // テスト対象
-        let full_data_result = db.get_user_data(res_user_info.get_user_id().to_string()).await.unwrap();
+        let full_data_result = db
+            .get_user_data(res_user_info.get_user_id().to_string())
+            .await
+            .unwrap();
         assert_eq!(full_data_result, new_user);
 
         // 削除
-        db.delete_user(res_user_info.get_user_id().to_string()).await.unwrap();
+        db.delete_user(res_user_info.get_user_id().to_string())
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
@@ -215,12 +229,17 @@ mod test {
         db.insert_new_user(new_user.clone()).await.unwrap();
 
         // テスト対象
-        let user_info_result = db.get_user_info_id(new_user.get_user_id().to_string()).await.unwrap();
+        let user_info_result = db
+            .get_user_info_id(new_user.get_user_id().to_string())
+            .await
+            .unwrap();
         assert_eq!(user_info_result.get_user_id(), new_user.get_user_id());
         assert_eq!(user_info_result.get_user_name(), new_user.get_user_name());
 
         // 削除
-        db.delete_user(user_info_result.get_user_id().to_string()).await.unwrap();
+        db.delete_user(user_info_result.get_user_id().to_string())
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
@@ -231,11 +250,16 @@ mod test {
         db.insert_new_user(new_user.clone()).await.unwrap();
 
         // テスト対象
-        let user_info_result = db.get_user_info_mail(new_user.get_user_mail().to_string()).await.unwrap();
+        let user_info_result = db
+            .get_user_info_mail(new_user.get_user_mail().to_string())
+            .await
+            .unwrap();
         assert_eq!(user_info_result.get_user_id(), new_user.get_user_id());
         assert_eq!(user_info_result.get_user_name(), new_user.get_user_name());
 
         // 削除
-        db.delete_user(user_info_result.get_user_id().to_string()).await.unwrap();
+        db.delete_user(user_info_result.get_user_id().to_string())
+            .await
+            .unwrap();
     }
 }
