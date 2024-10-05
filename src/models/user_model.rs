@@ -40,6 +40,15 @@ pub struct PubUserInfo {
     user_name: String,
 }
 
+impl From<User> for PubUserInfo {
+    fn from(value: User) -> Self {
+        Self {
+            user_id: value.get_user_id().to_string(),
+            user_name: value.get_user_name().to_string(),
+        }
+    }
+}
+
 impl PubUserInfo {
     pub fn get_user_id(&self) -> &str {
         &self.user_id
