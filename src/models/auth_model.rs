@@ -1,3 +1,6 @@
+use std::time::Duration;
+
+use chrono::Local;
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use serde::{Deserialize, Serialize};
 
@@ -23,21 +26,30 @@ impl AuthPayload {
 // JsonWebTokenのPayload部
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    iss: String,
-    sub: String,
     user_id: String,
     user_name: String,
     exp: usize,
 }
 
+impl Claims {
+    pub fn get_user_id(&self) -> &str {
+        &self.user_id
+    }
+
+    pub fn get_user_name(&self) -> &str {
+        &self.user_name
+    }
+}
+
 impl From<PubUserInfo> for Claims {
     fn from(value: PubUserInfo) -> Self {
+        // 現在時刻から1時間後をjwtの有効期限として設定している
+        let offset_lim_time = Local::now() + Duration::new(3600,0);
+        let exp = offset_lim_time.timestamp() as usize;
         Self {
-            iss: "http://localhost:8080".to_string(),
-            sub: "AccessToken".to_string(),
             user_id: value.get_user_id().to_owned(),
             user_name: value.get_user_name().to_owned(),
-            exp: 2000000000,
+            exp,
         }
     }
 }
@@ -49,6 +61,10 @@ pub struct AccsessToken(String);
 impl AccsessToken {
     pub fn new(access_token: String) -> Self {
         Self(access_token)
+    }
+
+    pub fn get(&self) -> &str {
+        &self.0
     }
 }
 
