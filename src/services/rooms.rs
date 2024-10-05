@@ -18,6 +18,10 @@ impl<'a, T> RoomServices<'a, T>
 where
     T: RoomManage<Info = RoomInfo, Data = Room, Error = RoomError>,
 {
+    pub fn new(room_db: &'a T) -> Self {
+        Self { room_db }
+    }
+
     pub fn create_room(
         &self,
         payload: CreateRoom,
@@ -26,7 +30,7 @@ where
         // TODO: ルーム名のバリデーションを行う
         let room_info = self
             .room_db
-            .open_new_room(payload.get_room_name(), user_info.get_user_id())
+            .open_new_room(payload.get_room_name(), user_info)
             .map_err(|e| e)?;
 
         Ok(room_info)
@@ -35,6 +39,11 @@ where
     pub fn get_target_room_info(&self, room_id: &str) -> Result<RoomInfo, RoomError> {
         let room = self.room_db.listen_room(room_id).map_err(|e| e)?;
         Ok(room.get_room_info().to_owned())
+    }
+
+    pub fn get_all_room_info(&self) -> Result<Vec<RoomInfo>, RoomError> {
+        let rooms = self.room_db.get_all_room().map_err(|e| e)?;
+        Ok(rooms)
     }
 
     pub fn get_sender(&self, room_id: &str) -> Result<Sender<String>, RoomError> {
@@ -48,7 +57,7 @@ where
         user_info: PubUserInfo,
     ) -> Result<(), RoomError> {
         let room = self.room_db.listen_room(room_id).map_err(|e| e)?;
-        let room_owner = room.get_room_info().get_created_by();
+        let room_owner = room.get_room_info().get_created_by_id();
 
         if room_owner == user_info.get_user_id() {
             self.room_db.delete_room(room_id).map_err(|e| e)
