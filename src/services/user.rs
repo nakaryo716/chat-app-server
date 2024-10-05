@@ -36,6 +36,7 @@ where
         {
             return Err(UserServiciesError::AlreadyExist);
         }
+        // TODO: パスワードのHASH化
         // ユーザーの作成
         let new_user = User::new(new_user_payload);
 
@@ -75,10 +76,10 @@ where
         Ok(user_data)
     }
 
-    pub async fn get_full_user_data(&self, user_id: String) -> Result<User, UserServiciesError> {
+    pub async fn get_full_user_data(&self, user_mail: String) -> Result<User, UserServiciesError> {
         let user_data = self
             .db_pool
-            .get_user_data(user_id)
+            .get_user_data(user_mail)
             .await
             .map_err(|e| match e {
                 sqlx::error::Error::RowNotFound => UserServiciesError::NotFound,

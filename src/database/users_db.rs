@@ -69,7 +69,7 @@ pub trait UserDataViewer<Id, Mail> {
     type UserInfo;
     type PassWord;
     type Error;
-    async fn get_user_data(&self, user_id: Id) -> Result<Self::FullUserData, Self::Error>;
+    async fn get_user_data(&self, user_mail: Mail) -> Result<Self::FullUserData, Self::Error>;
     async fn get_user_info_id(&self, user_id: Id) -> Result<Self::UserInfo, Self::Error>;
     async fn get_user_info_mail(&self, user_mail: Mail) -> Result<Self::UserInfo, Self::Error>;
 }
@@ -81,15 +81,15 @@ impl UserDataViewer<String, String> for UserDb {
     type PassWord = String;
     type Error = sqlx::error::Error;
 
-    async fn get_user_data(&self, user_id: String) -> Result<Self::FullUserData, Self::Error> {
+    async fn get_user_data(&self, user_mail: String) -> Result<Self::FullUserData, Self::Error> {
         let data: User = sqlx::query_as(
             r#"
             SELECT user_id, user_name, user_mail, user_pass
             FROM user_data
-            WHERE user_id = $1
+            WHERE user_mail = $1
             "#,
         )
-        .bind(user_id)
+        .bind(user_mail)
         .fetch_one(&self.pool)
         .await
         .map_err(|e| e)?;
@@ -178,9 +178,7 @@ mod test {
 
         // 再度クエリし、エラーが返ることを確認する
         // エラーはRowNotFoundになる
-        let query_result = db
-            .get_user_data(res_user_info.get_user_id().to_string())
-            .await;
+        let query_result = db.get_user_data(new_user.get_user_mail().to_string()).await;
         match query_result {
             Ok(_) => {
                 panic!("Expect Row Not Found");
@@ -210,7 +208,7 @@ mod test {
 
         // テスト対象
         let full_data_result = db
-            .get_user_data(res_user_info.get_user_id().to_string())
+            .get_user_data(new_user.get_user_mail().to_string())
             .await
             .unwrap();
         assert_eq!(full_data_result, new_user);
