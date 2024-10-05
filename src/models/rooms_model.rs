@@ -1,11 +1,12 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::Sender;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct RoomInfo {
     pub room_id: String,
     pub room_name: String,
-    pub created_by: String,
+    pub created_by_id: String,
+    pub created_by_name: String,
 }
 
 #[derive(Debug, Clone)]
@@ -23,8 +24,12 @@ impl RoomInfo {
         &self.room_name
     }
 
-    pub fn get_created_by(&self) -> &str {
-        &self.created_by
+    pub fn get_created_by_id(&self) -> &str {
+        &self.created_by_id
+    }
+
+    pub fn get_created_by_name(&self) -> &str {
+        &self.created_by_name
     }
 }
 
