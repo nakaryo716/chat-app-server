@@ -100,7 +100,7 @@ fn init_room(room_name: &str, created_by_id: &str, user_name: &str) -> Room {
         room_info: RoomInfo {
             room_id: Uuid::new_v4().to_string(),
             room_name: room_name.to_owned(),
-            created_by: created_by_id.to_owned(),
+            created_by_id: created_by_id.to_owned(),
             created_by_name: user_name.to_owned(),
         },
         sender,
