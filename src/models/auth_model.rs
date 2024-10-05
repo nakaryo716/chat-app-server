@@ -44,7 +44,7 @@ impl Claims {
 impl From<PubUserInfo> for Claims {
     fn from(value: PubUserInfo) -> Self {
         // 現在時刻から1時間後をjwtの有効期限として設定している
-        let offset_lim_time = Local::now() + Duration::new(3600,0);
+        let offset_lim_time = Local::now() + Duration::new(3600, 0);
         let exp = offset_lim_time.timestamp() as usize;
         Self {
             user_id: value.get_user_id().to_owned(),

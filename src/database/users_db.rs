@@ -1,5 +1,8 @@
-use crate::models::user_model::{PubUserInfo, User};
-use axum::async_trait;
+use crate::{
+    models::user_model::{PubUserInfo, User},
+    AppState,
+};
+use axum::{async_trait, extract::FromRef};
 use sqlx::PgPool;
 
 #[derive(Debug, Clone)]
@@ -123,6 +126,12 @@ impl UserDataViewer<String, String> for UserDb {
         .await
         .map_err(|e| e)?;
         Ok(data)
+    }
+}
+
+impl FromRef<AppState> for UserDb {
+    fn from_ref(input: &AppState) -> Self {
+        input.user_db.clone()
     }
 }
 

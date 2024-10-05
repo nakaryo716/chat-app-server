@@ -2,7 +2,11 @@ use axum::{extract::State, response::IntoResponse, Json};
 use axum_extra::extract::{cookie::Cookie, CookieJar};
 use http::StatusCode;
 
-use crate::{database::users_db::UserDb, models::auth_model::AuthPayload, services::auth::{AuthError, AuthorizeServices, COOKIEKEY}};
+use crate::{
+    database::users_db::UserDb,
+    models::auth_model::AuthPayload,
+    services::auth::{AuthError, AuthorizeServices, COOKIEKEY},
+};
 
 pub async fn login(
     State(db): State<UserDb>,

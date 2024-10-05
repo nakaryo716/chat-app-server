@@ -1,4 +1,11 @@
-use crate::models::rooms_model::{Room, RoomInfo};
+use crate::{
+    models::{
+        rooms_model::{Room, RoomInfo},
+        user_model::PubUserInfo,
+    },
+    AppState,
+};
+use axum::extract::FromRef;
 use std::{
     collections::HashMap,
     sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
@@ -7,6 +14,7 @@ use tokio::sync::broadcast;
 use uuid::Uuid;
 
 // ユーザーが開設したチャットルームのメタ情報及びtokio::bradcastのチャンネルを保持して使えるようにする構造体
+#[derive(Debug, Clone)]
 pub struct RoomDb {
     pool: Arc<RwLock<HashMap<String, Room>>>,
 }
@@ -27,9 +35,10 @@ pub trait RoomManage {
     fn open_new_room(
         &self,
         room_name: &str,
-        created_by_id: &str,
+        user_info: PubUserInfo,
     ) -> Result<Self::Info, Self::Error>;
     fn listen_room(&self, room_id: &str) -> Result<Self::Data, Self::Error>;
+    fn get_all_room(&self) -> Result<Vec<Self::Info>, Self::Error>;
     fn delete_room(&self, room_id: &str) -> Result<(), Self::Error>;
 }
 
@@ -40,9 +49,13 @@ impl RoomManage for RoomDb {
     fn open_new_room(
         &self,
         room_name: &str,
-        created_by_id: &str,
+        user_info: PubUserInfo,
     ) -> Result<Self::Info, Self::Error> {
-        let room = init_room(room_name, created_by_id);
+        let room = init_room(
+            room_name,
+            user_info.get_user_id(),
+            user_info.get_user_name(),
+        );
         let mut gurad = get_write_lock(&self).map_err(|e| e)?;
         gurad.insert(room.get_room_info().get_room_id().to_string(), room.clone());
 
@@ -60,6 +73,16 @@ impl RoomManage for RoomDb {
         Ok(room)
     }
 
+    fn get_all_room(&self) -> Result<Vec<Self::Info>, Self::Error> {
+        let lock = get_read_lock(&self).map_err(|e| e)?;
+
+        let rooms: Vec<RoomInfo> = lock
+            .iter()
+            .map(|(_, room)| room.get_room_info().to_owned())
+            .collect();
+        Ok(rooms)
+    }
+
     // ルームを削除するメソッド
     fn delete_room(&self, room_id: &str) -> Result<(), Self::Error> {
         let _ = get_write_lock(&self)
@@ -70,14 +93,15 @@ impl RoomManage for RoomDb {
 
 // ユニークIDを割り振る
 // チャンネルの作成を行う
-fn init_room(room_name: &str, created_by_id: &str) -> Room {
+fn init_room(room_name: &str, created_by_id: &str, user_name: &str) -> Room {
     let (sender, _) = broadcast::channel(128);
 
     Room {
         room_info: RoomInfo {
             room_id: Uuid::new_v4().to_string(),
             room_name: room_name.to_owned(),
-            created_by: created_by_id.to_owned(),
+            created_by_id: created_by_id.to_owned(),
+            created_by_name: user_name.to_owned(),
         },
         sender,
     }
@@ -96,4 +120,10 @@ fn get_read_lock(db: &RoomDb) -> Result<RwLockReadGuard<HashMap<String, Room>>, 
 pub enum RoomError {
     DbError,
     IdNotFound,
+}
+
+impl FromRef<AppState> for RoomDb {
+    fn from_ref(input: &AppState) -> Self {
+        input.room_db.clone()
+    }
 }

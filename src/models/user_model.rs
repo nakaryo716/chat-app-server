@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
 
+use super::auth_model::Claims;
+
 #[derive(Debug, Clone, FromRow, PartialEq)]
 pub struct User {
     user_id: String,
@@ -42,6 +44,15 @@ pub struct PubUserInfo {
 
 impl From<User> for PubUserInfo {
     fn from(value: User) -> Self {
+        Self {
+            user_id: value.get_user_id().to_string(),
+            user_name: value.get_user_name().to_string(),
+        }
+    }
+}
+
+impl From<Claims> for PubUserInfo {
+    fn from(value: Claims) -> Self {
         Self {
             user_id: value.get_user_id().to_string(),
             user_name: value.get_user_name().to_string(),

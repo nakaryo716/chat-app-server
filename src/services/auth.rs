@@ -37,9 +37,7 @@ where
     T: UserDataViewer<String, String, FullUserData = User, UserInfo = PubUserInfo>,
 {
     pub fn new(db_pool: &'a T) -> Self {
-        Self {
-            db_pool,
-        }
+        Self { db_pool }
     }
     pub async fn authorize(&self, auth_payload: AuthPayload) -> Result<AccsessToken, AuthError> {
         if auth_payload.get_client_mail().is_empty() || auth_payload.get_client_secret().is_empty()
@@ -54,7 +52,7 @@ where
             .map_err(|_| AuthError::MissingCredentials)?;
 
         // TODO: 実際にはパスワードはHASH化されており、計算しverifyする
-        if full_user_data.get_user_pass() != auth_payload.get_client_secret(){
+        if full_user_data.get_user_pass() != auth_payload.get_client_secret() {
             return Err(AuthError::InvalidToken);
         }
 
@@ -64,7 +62,8 @@ where
         let claims = Claims::from(user_info);
 
         // create token
-        let token = encode(&Header::default(), &claims, SECRETKEYS.ref_encode_key()).map_err(|_|AuthError::TokenCreation)?;
+        let token = encode(&Header::default(), &claims, SECRETKEYS.ref_encode_key())
+            .map_err(|_| AuthError::TokenCreation)?;
 
         Ok(AccsessToken::new(token))
     }
@@ -80,11 +79,13 @@ where
 {
     type Rejection = AuthError;
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let jar = CookieJar::from_request_parts(parts, state).await.map_err(|_|AuthError::TokenCreation)?;
+        let jar = CookieJar::from_request_parts(parts, state)
+            .await
+            .map_err(|_| AuthError::TokenCreation)?;
         let cookie = jar.get(COOKIEKEY).map(|e| e.to_owned());
 
         let access_token = match &cookie {
-            Some(cookie) =>  cookie.value(),
+            Some(cookie) => cookie.value(),
             None => return Err(AuthError::MissingCredentials),
         };
 
