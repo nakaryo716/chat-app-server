@@ -61,31 +61,15 @@ where
         Ok(a)
     }
 
-    pub async fn get_user_by_mail(
-        &self,
-        user_mail: String,
-    ) -> Result<PubUserInfo, UserServiciesError> {
-        let user_data = self
-            .db_pool
-            .get_user_info_mail(user_mail)
+    pub async fn delete_user(&self, user_id: &str) -> Result<(), UserServiciesError> {
+        self.db_pool
+            .delete_user(user_id.to_string())
             .await
             .map_err(|e| match e {
                 sqlx::error::Error::RowNotFound => UserServiciesError::NotFound,
                 _ => UserServiciesError::Unexpect,
             })?;
-        Ok(user_data)
-    }
-
-    pub async fn get_full_user_data(&self, user_mail: String) -> Result<User, UserServiciesError> {
-        let user_data = self
-            .db_pool
-            .get_user_data(user_mail)
-            .await
-            .map_err(|e| match e {
-                sqlx::error::Error::RowNotFound => UserServiciesError::NotFound,
-                _ => UserServiciesError::Unexpect,
-            })?;
-        Ok(user_data)
+        Ok(())
     }
 }
 
