@@ -11,7 +11,7 @@ use crate::{
             create_room_handler, delete_room_handler, get_all_room_info_handler,
             get_specific_room_info,
         },
-        user_handlers::add_new_user,
+        user_handlers::{add_new_user, delete_user_handle, get_user_info_handle},
     },
     AppState,
 };
@@ -19,7 +19,12 @@ use crate::{
 // ルーティング処理の実装
 pub fn app(app_state: AppState) -> Router {
     Router::new()
-        .route("/user", post(add_new_user))
+        .route(
+            "/user",
+            post(add_new_user)
+                .get(get_user_info_handle)
+                .delete(delete_user_handle),
+        )
         .route("/login", post(login))
         .route(
             "/room",
