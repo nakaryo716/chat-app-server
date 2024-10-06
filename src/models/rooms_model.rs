@@ -20,16 +20,8 @@ impl RoomInfo {
         &self.room_id
     }
 
-    pub fn get_room_name(&self) -> &str {
-        &self.room_name
-    }
-
     pub fn get_created_by_id(&self) -> &str {
         &self.created_by_id
-    }
-
-    pub fn get_created_by_name(&self) -> &str {
-        &self.created_by_name
     }
 }
 
