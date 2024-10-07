@@ -4,7 +4,6 @@ use tracing::info;
 
 mod database;
 mod handlers;
-mod middleware;
 mod models;
 mod route;
 mod services;
