@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::Sender;
+use validator::Validate;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 pub struct CreateRoom {
+    #[validate(length(min = 1, max = 30))]
     room_name: String,
 }
 
