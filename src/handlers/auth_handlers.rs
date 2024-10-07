@@ -1,17 +1,17 @@
-use axum::{extract::State, response::IntoResponse, Json};
+use axum::{extract::State, response::IntoResponse};
 use axum_extra::extract::{cookie::Cookie, CookieJar};
 use http::StatusCode;
 
 use crate::{
     database::users_db::UserDb,
     models::auth_model::AuthPayload,
-    services::auth::{AuthError, AuthorizeServices, COOKIEKEY},
+    services::auth::{AuthError, AuthorizeServices, COOKIEKEY}, util::ValidatedJson,
 };
 
 pub async fn login(
     State(db): State<UserDb>,
     jar: CookieJar,
-    Json(payload): Json<AuthPayload>,
+    ValidatedJson(payload): ValidatedJson<AuthPayload>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let services = AuthorizeServices::new(&db);
 
@@ -21,6 +21,5 @@ pub async fn login(
     })?;
 
     let cookie = Cookie::new(COOKIEKEY, token.get().to_owned());
-
     Ok((StatusCode::OK, jar.add(cookie)))
 }

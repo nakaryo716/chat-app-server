@@ -7,7 +7,7 @@ use crate::{
     services::{
         auth::{AuthorizeServices, COOKIEKEY},
         user::{UserServices, UserServiciesError},
-    },
+    }, util::ValidatedJson,
 };
 use axum::{extract::State, response::IntoResponse, Json};
 use axum_extra::extract::{cookie::Cookie, CookieJar};
@@ -15,7 +15,7 @@ use http::StatusCode;
 
 pub async fn add_new_user(
     State(db): State<UserDb>,
-    Json(new_user_payload): Json<CreateUserPayload>,
+    ValidatedJson(new_user_payload): ValidatedJson<CreateUserPayload>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let service = UserServices::new(&db);
     let user_info = service
@@ -49,7 +49,7 @@ pub async fn delete_user_handle(
     claims: Claims,
     jar: CookieJar,
     State(db): State<UserDb>,
-    Json(auth_payload): Json<AuthPayload>,
+    ValidatedJson(auth_payload): ValidatedJson<AuthPayload>,
 ) -> Result<impl IntoResponse, StatusCode> {
     // ユーザーデータの削除には再認証が必要
     let auth_service = AuthorizeServices::new(&db);
