@@ -1,6 +1,5 @@
 services:
   app:
-    container_name: api
     build: 
       dockerfile: Dockerfile
       context: .
@@ -10,25 +9,24 @@ services:
     ports:
       - '8080:8080'
     networks: 
-      - "night-chat-network"
+      - "chat-network"
     tty: true
     command: make
     depends_on:
       - "db"
   db:
-    container_name: database
     image: postgres:17.0-alpine
     ports:
       - '15432:5432'
     networks: 
-      - "night-chat-network"
+      - "chat-network"
     volumes:
-      - night-chat-volume:/var/lib/postgresql/data
+      - chat-volume:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: 'pg-user'
       POSTGRES_PASSWORD: 'postgres'
-      POSTGRES_DATABASE: 'night_chat_database'
+      POSTGRES_DATABASE: 'chat_database'
 volumes:
-  night-chat-volume:
+  chat-volume:
 networks:
-  night-chat-network:
+  chat-network:
