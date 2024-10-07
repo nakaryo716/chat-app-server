@@ -6,6 +6,7 @@ mod database;
 mod handlers;
 mod models;
 mod route;
+mod util;
 mod services;
 
 #[tokio::main]

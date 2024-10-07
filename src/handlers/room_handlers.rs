@@ -1,7 +1,7 @@
 use crate::{
     database::rooms_db::RoomDb,
     models::{auth_model::Claims, rooms_model::CreateRoom, user_model::PubUserInfo},
-    services::rooms::RoomServices,
+    services::rooms::RoomServices, util::ValidatedJson,
 };
 use axum::{
     extract::{Path, State},
@@ -13,7 +13,7 @@ use http::StatusCode;
 pub async fn create_room_handler(
     claims: Claims,
     State(room_db): State<RoomDb>,
-    Json(payload): Json<CreateRoom>,
+    ValidatedJson(payload): ValidatedJson<CreateRoom>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let room_services = RoomServices::new(&room_db);
     let user_info = PubUserInfo::from(claims);

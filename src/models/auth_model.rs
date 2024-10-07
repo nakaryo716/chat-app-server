@@ -3,13 +3,16 @@ use std::time::Duration;
 use chrono::Local;
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 use super::user_model::PubUserInfo;
 
 // クライアントから送られる認証情報
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct AuthPayload {
+    #[validate(email)]
     client_mail: String,
+    #[validate(length(min = 8, max = 64))]
     client_pass: String,
 }
 

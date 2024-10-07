@@ -26,6 +26,10 @@ impl ChatServices {
         let room_sender = self.room_sender.clone();
         let mut receive_task = tokio::task::spawn(async move {
             while let Some(Ok(Message::Text(sended_text))) = ws_receiver.next().await {
+                if sended_text.len() == 0 {
+                    continue;
+                }
+
                 let chat_msg = Chat::from_str(
                     self.user_info.get_user_id(),
                     self.user_info.get_user_name(),
