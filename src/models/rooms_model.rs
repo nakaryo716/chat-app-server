@@ -1,36 +1,21 @@
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::Sender;
 
-#[derive(Debug, Clone, Serialize)]
-pub struct RoomInfo {
-    pub room_id: String,
-    pub room_name: String,
-    pub created_by_id: String,
-    pub created_by_name: String,
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateRoom {
+    room_name: String,
+}
+
+impl CreateRoom {
+    pub fn get_room_name(&self) -> &str {
+        &self.room_name
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct Room {
     pub room_info: RoomInfo,
     pub sender: Sender<String>,
-}
-
-impl RoomInfo {
-    pub fn get_room_id(&self) -> &str {
-        &self.room_id
-    }
-
-    pub fn get_room_name(&self) -> &str {
-        &self.room_name
-    }
-
-    pub fn get_created_by_id(&self) -> &str {
-        &self.created_by_id
-    }
-
-    pub fn get_created_by_name(&self) -> &str {
-        &self.created_by_name
-    }
 }
 
 impl Room {
@@ -43,13 +28,20 @@ impl Room {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct CreateRoom {
-    room_name: String,
+#[derive(Debug, Clone, Serialize)]
+pub struct RoomInfo {
+    pub room_id: String,
+    pub room_name: String,
+    pub created_by_id: String,
+    pub created_by_name: String,
 }
 
-impl CreateRoom {
-    pub fn get_room_name(&self) -> &str {
-        &self.room_name
+impl RoomInfo {
+    pub fn get_room_id(&self) -> &str {
+        &self.room_id
+    }
+
+    pub fn get_created_by_id(&self) -> &str {
+        &self.created_by_id
     }
 }

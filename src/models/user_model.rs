@@ -4,6 +4,13 @@ use uuid::Uuid;
 
 use super::auth_model::Claims;
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateUserPayload {
+    pub user_name: String,
+    pub user_mail: String,
+    pub user_pass: String,
+}
+
 #[derive(Debug, Clone, FromRow, PartialEq)]
 pub struct User {
     user_id: String,
@@ -42,6 +49,16 @@ pub struct PubUserInfo {
     user_name: String,
 }
 
+impl PubUserInfo {
+    pub fn get_user_id(&self) -> &str {
+        &self.user_id
+    }
+
+    pub fn get_user_name(&self) -> &str {
+        &self.user_name
+    }
+}
+
 impl From<User> for PubUserInfo {
     fn from(value: User) -> Self {
         Self {
@@ -58,21 +75,4 @@ impl From<Claims> for PubUserInfo {
             user_name: value.get_user_name().to_string(),
         }
     }
-}
-
-impl PubUserInfo {
-    pub fn get_user_id(&self) -> &str {
-        &self.user_id
-    }
-
-    pub fn get_user_name(&self) -> &str {
-        &self.user_name
-    }
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct CreateUserPayload {
-    pub user_name: String,
-    pub user_mail: String,
-    pub user_pass: String,
 }

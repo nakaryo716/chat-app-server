@@ -10,7 +10,7 @@ use super::user_model::PubUserInfo;
 #[derive(Debug, Deserialize)]
 pub struct AuthPayload {
     client_mail: String,
-    client_secret: String,
+    client_pass: String,
 }
 
 impl AuthPayload {
@@ -19,7 +19,7 @@ impl AuthPayload {
     }
 
     pub fn get_client_secret(&self) -> &str {
-        &self.client_secret
+        &self.client_pass
     }
 }
 
