@@ -1,3 +1,4 @@
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::{
     async_trait,
     extract::FromRequestParts,
@@ -39,6 +40,7 @@ where
     pub fn new(db_pool: &'a T) -> Self {
         Self { db_pool }
     }
+
     pub async fn authorize(&self, auth_payload: AuthPayload) -> Result<AccsessToken, AuthError> {
         if auth_payload.get_client_mail().is_empty() || auth_payload.get_client_secret().is_empty()
         {
@@ -51,9 +53,19 @@ where
             .await
             .map_err(|_| AuthError::MissingCredentials)?;
 
-        // TODO: 実際にはパスワードはHASH化されており、計算しverifyする
-        if full_user_data.get_user_pass() != auth_payload.get_client_secret() {
-            return Err(AuthError::InvalidToken);
+        // ハッシュ化されたデータとペイロードでverifyする
+        // CPUバウンドのためブロッキングスレッドで行っている
+        let full_data = full_user_data.clone();
+        let res = tokio::task::spawn_blocking(move || {
+            AuthorizeServices::<T>::verify_pass(
+                full_data.get_user_pass(),
+                auth_payload.get_client_secret(),
+            )
+        })
+        .await.map_err(|_| AuthError::InvalidToken)?;
+        
+        if res.is_err() {
+            return Err(AuthError::WrongCredentials);
         }
 
         // ユーザー認証が完了したらUserデータからPubUserInfoを作成
@@ -66,6 +78,11 @@ where
             .map_err(|_| AuthError::TokenCreation)?;
 
         Ok(AccsessToken::new(token))
+    }
+
+    fn verify_pass(hashed_pass: &str, payload_pass: &str) -> Result<(), AuthError> {
+        let pwd_hash = PasswordHash::new(hashed_pass).map_err(|_| AuthError::InvalidToken)?;
+        Argon2::default().verify_password(payload_pass.as_bytes(), &pwd_hash).map_err(|_| AuthError::InvalidToken)
     }
 }
 
