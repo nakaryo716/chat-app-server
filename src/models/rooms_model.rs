@@ -3,6 +3,7 @@ use tokio::sync::broadcast::Sender;
 use validator::Validate;
 
 #[derive(Debug, Clone, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateRoom {
     #[validate(length(min = 1, max = 30))]
     room_name: String,
@@ -31,6 +32,7 @@ impl Room {
 }
 
 #[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RoomInfo {
     pub room_id: String,
     pub room_name: String,
