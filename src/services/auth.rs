@@ -28,14 +28,14 @@ pub static COOKIEKEY: &str = "token";
 
 pub struct AuthorizeServices<'a, T>
 where
-    T: UserDataViewer<String, String>,
+    T: UserDataViewer<String, String, Error = sqlx::error::Error>,
 {
     db_pool: &'a T,
 }
 
 impl<'a, T> AuthorizeServices<'a, T>
 where
-    T: UserDataViewer<String, String, FullUserData = User, UserInfo = PubUserInfo>,
+    T: UserDataViewer<String, String, FullUserData = User, UserInfo = PubUserInfo, Error = sqlx::error::Error>,
 {
     pub fn new(db_pool: &'a T) -> Self {
         Self { db_pool }
@@ -51,7 +51,7 @@ where
             .db_pool
             .get_user_data(auth_payload.get_client_mail().to_string())
             .await
-            .map_err(|_| AuthError::MissingCredentials)?;
+            .map_err(|e| AuthError::from(e))?;
 
         // ハッシュ化されたデータとペイロードでverifyする
         // CPUバウンドのためブロッキングスレッドで行っている
@@ -62,7 +62,7 @@ where
                 auth_payload.get_client_secret(),
             )
         })
-        .await.map_err(|_| AuthError::InvalidToken)?;
+        .await.map_err(|_| AuthError::Server)?;
         
         if res.is_err() {
             return Err(AuthError::WrongCredentials);
@@ -81,8 +81,8 @@ where
     }
 
     fn verify_pass(hashed_pass: &str, payload_pass: &str) -> Result<(), AuthError> {
-        let pwd_hash = PasswordHash::new(hashed_pass).map_err(|_| AuthError::InvalidToken)?;
-        Argon2::default().verify_password(payload_pass.as_bytes(), &pwd_hash).map_err(|_| AuthError::InvalidToken)
+        let pwd_hash = PasswordHash::new(hashed_pass).map_err(|_| AuthError::Server)?;
+        Argon2::default().verify_password(payload_pass.as_bytes(), &pwd_hash).map_err(|_| AuthError::WrongCredentials)
     }
 }
 
@@ -98,7 +98,7 @@ where
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let jar = CookieJar::from_request_parts(parts, state)
             .await
-            .map_err(|_| AuthError::TokenCreation)?;
+            .map_err(|_| AuthError::MissingCredentials)?;
         let cookie = jar.get(COOKIEKEY).map(|e| e.to_owned());
 
         let access_token = match &cookie {
@@ -111,7 +111,7 @@ where
             SECRETKEYS.ref_decode_key(),
             &Validation::default(),
         )
-        .map_err(|_| AuthError::WrongCredentials)?;
+        .map_err(|_| AuthError::InvalidToken)?;
 
         Ok(token_data.claims)
     }
@@ -119,23 +119,36 @@ where
 
 #[derive(Debug)]
 pub enum AuthError {
-    WrongCredentials,
     MissingCredentials,
+    WrongCredentials,
     TokenCreation,
     InvalidToken,
+    UserNotFound,
+    Server
 }
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
-            AuthError::WrongCredentials => (StatusCode::UNAUTHORIZED, "Wrong credentials"),
             AuthError::MissingCredentials => (StatusCode::BAD_REQUEST, "Missing credentials"),
+            AuthError::WrongCredentials => (StatusCode::UNAUTHORIZED, "Wrong credentials"),
             AuthError::TokenCreation => (StatusCode::INTERNAL_SERVER_ERROR, "Token creation error"),
             AuthError::InvalidToken => (StatusCode::BAD_REQUEST, "Invalid token"),
+            AuthError::UserNotFound => (StatusCode::NOT_FOUND, "User not found"),
+            AuthError::Server => (StatusCode::INTERNAL_SERVER_ERROR, "Server error occurred"),
         };
         let body = Json(json!({
             "error": error_message,
         }));
         (status, body).into_response()
+    }
+}
+
+impl From<sqlx::error::Error> for AuthError {
+    fn from(value: sqlx::error::Error) -> Self {
+        match value {
+            sqlx::error::Error::RowNotFound => AuthError::UserNotFound,
+            _ => AuthError::Server,
+        }
     }
 }
