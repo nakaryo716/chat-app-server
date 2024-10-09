@@ -1,4 +1,8 @@
 use argon2::{password_hash::Salt, Argon2, PasswordHasher};
+use axum::{response::{IntoResponse, Response}, Json};
+use http::StatusCode;
+use serde_json::json;
+use sqlx::Error;
 
 use crate::{
     database::users_db::{UserDataViewer, UserDbManage},
@@ -36,7 +40,7 @@ where
             .get_user_info_mail(new_user_payload.user_mail.clone())
             .await
         {
-            return Err(UserServiciesError::AlreadyExist);
+            return Err(UserServiciesError::UserAlreadyExist);
         }
         // パスワードのHASH化
         let hashed_user_payload = UserServices::<T>::to_hash_pwd(new_user_payload)?;
@@ -48,7 +52,7 @@ where
             .db_pool
             .insert_new_user(new_user)
             .await
-            .map_err(|_| UserServiciesError::Unexpect)?;
+            .map_err(|e| UserServiciesError::from(e))?;
         Ok(user_info)
     }
 
@@ -57,10 +61,7 @@ where
         .db_pool
         .get_user_info_id(user_id)
         .await
-        .map_err(|e| match e {
-                sqlx::error::Error::RowNotFound => UserServiciesError::NotFound,
-                _ => UserServiciesError::Unexpect,
-            })?;
+        .map_err(|e| UserServiciesError::from(e))?;
         Ok(user_info)
     }
 
@@ -68,10 +69,7 @@ where
         self.db_pool
         .delete_user(user_id.to_string())
         .await
-        .map_err(|e| match e {
-            sqlx::error::Error::RowNotFound => UserServiciesError::NotFound,
-            _ => UserServiciesError::Unexpect,
-        })?;
+        .map_err(|e| UserServiciesError::from(e))?;
         Ok(())
     }
 
@@ -95,8 +93,31 @@ where
 
 #[derive(Debug)]
 pub enum UserServiciesError {
-    NotFound,
-    AlreadyExist,
-    Unexpect,
+    UserAlreadyExist,
+    UserNotFound, 
     ToHash,
+    Server,
+}
+
+impl IntoResponse for UserServiciesError {
+    fn into_response(self) ->  Response {
+        let (status, error_message) = match self {
+            UserServiciesError::UserAlreadyExist => (StatusCode::BAD_REQUEST, "User already exists"),
+            UserServiciesError::UserNotFound => (StatusCode::NOT_FOUND, "User not found"),
+            _ => (StatusCode::INTERNAL_SERVER_ERROR, "Server error occurred"),
+        };
+        let body = Json(json!({
+            "error": error_message,
+        }));
+        (status, body).into_response()
+    }
+}
+
+impl From<Error> for UserServiciesError {
+    fn from(value: Error) -> Self {
+        match value {
+            Error::RowNotFound => UserServiciesError::UserNotFound,
+            _ => UserServiciesError::Server,
+        }
+    }
 }
