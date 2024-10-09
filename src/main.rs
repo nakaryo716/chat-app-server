@@ -1,5 +1,7 @@
+use axum::response::IntoResponse;
 use database::{rooms_db::RoomDb, users_db::UserDb};
 use route::app;
+use services::{auth::AuthError, user::UserServiciesError};
 use tracing::info;
 
 mod database;
@@ -20,7 +22,7 @@ async fn main() {
     let user_db = UserDb::connect(&database_url).await.unwrap();
 
     let app_state = AppState::new(room_db, user_db);
-    let app = app(app_state);
+    let app = app::<AppError>(app_state);
 
     axum::serve(listener, app).await.unwrap();
 }
@@ -34,5 +36,31 @@ pub struct AppState {
 impl AppState {
     pub fn new(room_db: RoomDb, user_db: UserDb) -> Self {
         Self { room_db, user_db }
+    }
+}
+#[derive(Debug)]
+pub enum AppError {
+    Auth(AuthError),
+    UserService(UserServiciesError),
+}
+
+impl From<AuthError> for AppError {
+    fn from(error: AuthError) -> Self {
+        AppError::Auth(error)
+    }
+}
+
+impl From<UserServiciesError> for AppError {
+    fn from(error: UserServiciesError) -> Self {
+        AppError::UserService(error)
+    }
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> axum::response::Response {
+        match self {
+            AppError::Auth(err) => err.into_response(),
+            AppError::UserService(err) => err.into_response(),
+        }
     }
 }

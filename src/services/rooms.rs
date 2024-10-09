@@ -5,6 +5,9 @@ use crate::{
         user_model::PubUserInfo,
     },
 };
+use axum::{response::IntoResponse, Json};
+use http::StatusCode;
+use serde_json::json;
 use tokio::sync::broadcast::Sender;
 
 pub struct RoomServices<'a, T>
@@ -64,5 +67,19 @@ where
         } else {
             Err(RoomError::DbError)
         }
+    }
+}
+
+impl IntoResponse for RoomError {
+    fn into_response(self) -> axum::response::Response {
+        let (status, message) = match self {
+            RoomError::DbError => (StatusCode::INTERNAL_SERVER_ERROR, "Server error occurred"),
+            RoomError::IdNotFound => (StatusCode::NOT_FOUND, "Room not found"),
+        };
+
+        let body = Json(json!({
+            "error": message,
+        }));
+        (status, body).into_response()
     }
 }

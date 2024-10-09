@@ -12,13 +12,9 @@ pub async fn login(
     State(db): State<UserDb>,
     jar: CookieJar,
     ValidatedJson(payload): ValidatedJson<AuthPayload>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, AuthError> {
     let services = AuthorizeServices::new(&db);
-
-    let token = services.authorize(payload).await.map_err(|e| match e {
-        AuthError::WrongCredentials => StatusCode::UNAUTHORIZED,
-        _ => StatusCode::INTERNAL_SERVER_ERROR,
-    })?;
+    let token = services.authorize(payload).await?;
 
     let cookie = Cookie::new(COOKIEKEY, token.get().to_owned());
     Ok((StatusCode::OK, jar.add(cookie)))
