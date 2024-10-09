@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Chat {
     user_id: String,
     user_name: String,

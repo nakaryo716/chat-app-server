@@ -9,6 +9,7 @@ use super::user_model::PubUserInfo;
 
 // クライアントから送られる認証情報
 #[derive(Debug, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
 pub struct AuthPayload {
     #[validate(email)]
     client_mail: String,
@@ -28,6 +29,7 @@ impl AuthPayload {
 
 // JsonWebTokenのPayload部
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Claims {
     user_id: String,
     user_name: String,

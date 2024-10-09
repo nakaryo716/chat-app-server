@@ -6,6 +6,7 @@ use validator::Validate;
 use super::auth_model::Claims;
 
 #[derive(Debug, Clone, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateUserPayload {
     #[validate(length(min = 1, max = 15))]
     pub user_name: String,
@@ -48,6 +49,7 @@ impl User {
     }
 }
 #[derive(Debug, Clone, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct PubUserInfo {
     user_id: String,
     user_name: String,
