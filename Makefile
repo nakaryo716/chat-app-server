@@ -6,5 +6,8 @@ create_database:
 migrate: create_database
 		sqlx migrate run
 
-run: migrate
-		cargo run
+release_build: migrate
+		cargo build --release
+
+run: release_build
+		./target/release/server
