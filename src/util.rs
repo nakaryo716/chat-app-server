@@ -1,4 +1,9 @@
-use axum::{async_trait, extract::{rejection::JsonRejection, FromRequest, Request}, response::{IntoResponse, Response}, Json};
+use axum::{
+    async_trait,
+    extract::{rejection::JsonRejection, FromRequest, Request},
+    response::{IntoResponse, Response},
+    Json,
+};
 use http::StatusCode;
 use thiserror::Error;
 use validator::Validate;
@@ -7,11 +12,11 @@ use validator::Validate;
 pub struct ValidatedJson<T>(pub T);
 
 #[async_trait]
-impl<S, T> FromRequest<S> for ValidatedJson<T> 
-where 
+impl<S, T> FromRequest<S> for ValidatedJson<T>
+where
     T: Validate,
     S: Send + Sync,
-    Json<T>: FromRequest<S, Rejection = JsonRejection>
+    Json<T>: FromRequest<S, Rejection = JsonRejection>,
 {
     type Rejection = ServerError;
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {

@@ -6,8 +6,8 @@ pub mod database;
 pub mod handlers;
 pub mod models;
 pub mod route;
-pub mod util;
 pub mod services;
+pub mod util;
 
 #[derive(Debug, Clone)]
 pub struct AppState {

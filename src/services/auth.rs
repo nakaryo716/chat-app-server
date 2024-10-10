@@ -35,7 +35,13 @@ where
 
 impl<'a, T> AuthorizeServices<'a, T>
 where
-    T: UserDataViewer<String, String, FullUserData = User, UserInfo = PubUserInfo, Error = sqlx::error::Error>,
+    T: UserDataViewer<
+        String,
+        String,
+        FullUserData = User,
+        UserInfo = PubUserInfo,
+        Error = sqlx::error::Error,
+    >,
 {
     pub fn new(db_pool: &'a T) -> Self {
         Self { db_pool }
@@ -62,8 +68,9 @@ where
                 auth_payload.get_client_secret(),
             )
         })
-        .await.map_err(|_| AuthError::Server)?;
-        
+        .await
+        .map_err(|_| AuthError::Server)?;
+
         if res.is_err() {
             return Err(AuthError::WrongCredentials);
         }
@@ -82,7 +89,9 @@ where
 
     fn verify_pass(hashed_pass: &str, payload_pass: &str) -> Result<(), AuthError> {
         let pwd_hash = PasswordHash::new(hashed_pass).map_err(|_| AuthError::Server)?;
-        Argon2::default().verify_password(payload_pass.as_bytes(), &pwd_hash).map_err(|_| AuthError::WrongCredentials)
+        Argon2::default()
+            .verify_password(payload_pass.as_bytes(), &pwd_hash)
+            .map_err(|_| AuthError::WrongCredentials)
     }
 }
 
@@ -124,7 +133,7 @@ pub enum AuthError {
     TokenCreation,
     InvalidToken,
     UserNotFound,
-    Server
+    Server,
 }
 
 impl IntoResponse for AuthError {

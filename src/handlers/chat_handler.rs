@@ -23,7 +23,7 @@ pub async fn chat_handler_with_upgrade(
             let body = Json(json!({
                 "error": "Room not found",
             }));
-            return (StatusCode::NOT_FOUND, body).into_response()
+            return (StatusCode::NOT_FOUND, body).into_response();
         }
     };
     let user_info = PubUserInfo::from(claims);

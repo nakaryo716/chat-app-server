@@ -5,7 +5,8 @@ use http::StatusCode;
 use crate::{
     database::users_db::UserDb,
     models::auth_model::AuthPayload,
-    services::auth::{AuthError, AuthorizeServices, COOKIEKEY}, util::ValidatedJson,
+    services::auth::{AuthError, AuthorizeServices, COOKIEKEY},
+    util::ValidatedJson,
 };
 
 pub async fn login(

@@ -1,5 +1,8 @@
 use argon2::{password_hash::Salt, Argon2, PasswordHasher};
-use axum::{response::{IntoResponse, Response}, Json};
+use axum::{
+    response::{IntoResponse, Response},
+    Json,
+};
 use http::StatusCode;
 use serde_json::json;
 use sqlx::Error;
@@ -58,31 +61,31 @@ where
 
     pub async fn get_user_by_id(&self, user_id: String) -> Result<PubUserInfo, UserServiciesError> {
         let user_info = self
-        .db_pool
-        .get_user_info_id(user_id)
-        .await
-        .map_err(|e| UserServiciesError::from(e))?;
+            .db_pool
+            .get_user_info_id(user_id)
+            .await
+            .map_err(|e| UserServiciesError::from(e))?;
         Ok(user_info)
     }
 
     pub async fn delete_user(&self, user_id: &str) -> Result<(), UserServiciesError> {
         self.db_pool
-        .delete_user(user_id.to_string())
-        .await
-        .map_err(|e| UserServiciesError::from(e))?;
+            .delete_user(user_id.to_string())
+            .await
+            .map_err(|e| UserServiciesError::from(e))?;
         Ok(())
     }
 
     fn to_hash_pwd(payload: CreateUserPayload) -> Result<CreateUserPayload, UserServiciesError> {
         let salt = dotenvy::var("SALT").map_err(|_| UserServiciesError::ToHash)?;
         let salt = Salt::from_b64(&salt).map_err(|_| UserServiciesError::ToHash)?;
-    
+
         let row_pwd = payload.user_pass;
         let hashed_pwd = Argon2::default()
             .hash_password(row_pwd.as_bytes(), salt)
             .map_err(|_| UserServiciesError::ToHash)?
             .to_string();
-    
+
         let hashed_payload = CreateUserPayload {
             user_pass: hashed_pwd,
             ..payload
@@ -94,15 +97,17 @@ where
 #[derive(Debug)]
 pub enum UserServiciesError {
     UserAlreadyExist,
-    UserNotFound, 
+    UserNotFound,
     ToHash,
     Server,
 }
 
 impl IntoResponse for UserServiciesError {
-    fn into_response(self) ->  Response {
+    fn into_response(self) -> Response {
         let (status, error_message) = match self {
-            UserServiciesError::UserAlreadyExist => (StatusCode::BAD_REQUEST, "User already exists"),
+            UserServiciesError::UserAlreadyExist => {
+                (StatusCode::BAD_REQUEST, "User already exists")
+            }
             UserServiciesError::UserNotFound => (StatusCode::NOT_FOUND, "User not found"),
             _ => (StatusCode::INTERNAL_SERVER_ERROR, "Server error occurred"),
         };
