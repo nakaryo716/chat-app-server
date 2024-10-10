@@ -3,15 +3,11 @@ services:
     build: 
       dockerfile: Dockerfile
       context: .
-    working_dir: "/app"
-    volumes:
-      - '.:/app'
     ports:
       - '8080:8080'
     networks: 
       - "chat-network"
     tty: true
-    command: make
     depends_on:
       - "db"
   db:
