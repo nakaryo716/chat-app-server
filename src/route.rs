@@ -1,5 +1,7 @@
 use axum::{
-    response::IntoResponse, routing::{get, post}, Router
+    response::IntoResponse,
+    routing::{get, post},
+    Router,
 };
 
 use crate::{
@@ -11,12 +13,14 @@ use crate::{
             get_specific_room_info,
         },
         user_handlers::{add_new_user, delete_user_handle, get_user_info_handle},
-    }, services::{auth::AuthError, user::UserServiciesError}, AppState
+    },
+    services::{auth::AuthError, user::UserServiciesError},
+    AppState,
 };
 
 // ルーティング処理の実装
-pub fn app<E>(app_state: AppState) -> Router 
-where 
+pub fn app<E>(app_state: AppState) -> Router
+where
     E: IntoResponse + From<AuthError> + From<UserServiciesError> + 'static,
 {
     Router::new()

@@ -3,11 +3,11 @@ use database::{rooms_db::RoomDb, users_db::UserDb};
 use services::{auth::AuthError, user::UserServiciesError};
 
 pub mod database;
-pub mod handlers;
-pub mod models;
+mod handlers;
+mod models;
 pub mod route;
-pub mod util;
-pub mod services;
+mod services;
+mod util;
 
 #[derive(Debug, Clone)]
 pub struct AppState {
