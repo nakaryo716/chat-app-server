@@ -30,7 +30,6 @@ where
         payload: CreateRoom,
         user_info: PubUserInfo,
     ) -> Result<RoomInfo, RoomError> {
-        // TODO: ルーム名のバリデーションを行う
         let room_info = self
             .room_db
             .open_new_room(payload.get_room_name(), user_info)
