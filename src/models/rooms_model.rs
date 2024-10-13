@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::Sender;
 use validator::Validate;
@@ -38,6 +39,7 @@ pub struct RoomInfo {
     pub room_name: String,
     pub created_by_id: String,
     pub created_by_name: String,
+    pub created_time: DateTime<Utc>,
 }
 
 impl RoomInfo {
