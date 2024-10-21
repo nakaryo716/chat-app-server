@@ -14,8 +14,7 @@ use crate::{
         auth_handlers::login,
         chat_handler::chat_handler_with_upgrade,
         room_handlers::{
-            create_room_handler, delete_room_handler, get_all_room_info_handler,
-            get_specific_room_info,
+            create_room_handler, delete_room_handler, get_all_room_info_handler, get_owner_room_handler, get_specific_room_info
         },
         user_handlers::{add_new_user, delete_user_handle, get_user_info_handle},
     },
@@ -32,7 +31,7 @@ where
         .iter()
         .map(|e| e.parse::<HeaderValue>().unwrap())
         .collect();
-    
+
     Router::new()
         .route(
             "/user",
@@ -45,6 +44,7 @@ where
             "/room",
             post(create_room_handler).get(get_all_room_info_handler),
         )
+        .route("/room/self", get(get_owner_room_handler))
         .route(
             "/room/:id",
             get(get_specific_room_info).delete(delete_room_handler),
