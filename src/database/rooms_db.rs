@@ -39,6 +39,7 @@ pub trait RoomManage {
         user_info: PubUserInfo,
     ) -> Result<Self::Info, Self::Error>;
     fn listen_room(&self, room_id: &str) -> Result<Self::Data, Self::Error>;
+    fn get_owner_rooms(&self, owner_id: &str) -> Result<Vec<Self::Info>, Self::Error>;
     fn get_all_room(&self) -> Result<Vec<Self::Info>, Self::Error>;
     fn delete_room(&self, room_id: &str) -> Result<(), Self::Error>;
 }
@@ -72,6 +73,19 @@ impl RoomManage for RoomDb {
                 .ok_or_else(|| RoomError::IdNotFound)
         })?;
         Ok(room)
+    }
+
+    fn get_owner_rooms(&self, owner_id: &str) -> Result<Vec<Self::Info>, Self::Error> {
+        let lock = get_read_lock(&self).map_err(|e| e)?;
+
+        let filtered_room = lock
+            .iter()
+            .filter(|(_, room)| room.get_room_info().created_by_id == owner_id);
+
+        let owner_rooms: Vec<RoomInfo> = filtered_room
+            .map(|(_, b)| b.get_room_info().to_owned())
+            .collect();
+        Ok(owner_rooms)
     }
 
     fn get_all_room(&self) -> Result<Vec<Self::Info>, Self::Error> {
