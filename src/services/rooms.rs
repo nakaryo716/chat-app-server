@@ -1,8 +1,7 @@
 use crate::{
     database::rooms_db::{RoomError, RoomManage},
     models::{
-        rooms_model::{CreateRoom, Room, RoomInfo},
-        user_model::PubUserInfo,
+        auth_model::Claims, rooms_model::{CreateRoom, Room, RoomInfo}, user_model::PubUserInfo
     },
 };
 use axum::{response::IntoResponse, Json};
@@ -41,6 +40,12 @@ where
     pub fn get_target_room_info(&self, room_id: &str) -> Result<RoomInfo, RoomError> {
         let room = self.room_db.listen_room(room_id).map_err(|e| e)?;
         Ok(room.get_room_info().to_owned())
+    }
+
+    pub fn get_owner_room_info(&self, claims: Claims) -> Result<Vec<RoomInfo>, RoomError> {
+        let room_owner_id = claims.get_user_id();
+        let rooms = self.room_db.get_owner_rooms(room_owner_id).map_err(|e|e)?;
+        Ok(rooms)
     }
 
     pub fn get_all_room_info(&self) -> Result<Vec<RoomInfo>, RoomError> {
