@@ -33,6 +33,16 @@ pub async fn get_specific_room_info(
     Ok((StatusCode::OK, Json(room_info)))
 }
 
+pub async fn get_owner_room_handler(
+    claims: Claims,
+    State(room_db): State<RoomDb>,
+) -> Result<impl IntoResponse, RoomError> {
+    let room_services = RoomServices::new(&room_db);
+
+    let owner_room_info = room_services.get_owner_room_info(claims).map_err(|e| e)?;
+    Ok((StatusCode::OK, Json(owner_room_info)))
+}
+
 pub async fn get_all_room_info_handler(
     _claims: Claims,
     State(room_db): State<RoomDb>,
