@@ -1,1 +1,3 @@
 /target
+/signed-certs/key.pem
+/signed-certs/cert.pem

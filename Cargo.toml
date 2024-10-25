@@ -8,6 +8,7 @@ argon2 = "0.5.3"
 async-trait = "0.1.82"
 axum = { version = "0.7.7", features = ["ws"] }
 axum-extra = { version = "0.9.3", features = ["cookie"] }
+axum-server = { version = "0.7.1", features = ["tls-openssl"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 dotenvy = "0.15.7"
 futures = "0.3.31"

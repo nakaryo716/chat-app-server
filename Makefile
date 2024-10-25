@@ -10,4 +10,4 @@ release_build: migrate
 		cargo build --release
 
 run: release_build
-		./target/release/server
+		./target/release/tls_server
