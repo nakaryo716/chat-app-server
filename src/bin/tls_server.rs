@@ -21,7 +21,7 @@ async fn main() {
 
     let allow_origin = dotenvy::var("ALLOW_ORIGIN").unwrap();
     let origins = vec![allow_origin];
-    info!("[system]Setting CORS policy....OK");
+    info!("[system]Load CORS Origin settings....OK");
 
     let database_url = dotenvy::var("DATABASE_URL").unwrap();
     let user_db = UserDb::connect(&database_url).await.unwrap();
@@ -31,7 +31,7 @@ async fn main() {
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     let app = app::<AppError>(app_state, origins);
-    info!("server running");
+    info!("[system]server running");
 
     axum_server::bind_openssl(addr, config)
         .serve(app.into_make_service())
