@@ -1,13 +1,14 @@
-use crate::{
-    database::rooms_db::{RoomError, RoomManage},
-    models::{
-        auth_model::Claims, rooms_model::{CreateRoom, Room, RoomInfo}, user_model::PubUserInfo
-    },
-};
 use axum::{response::IntoResponse, Json};
 use http::StatusCode;
 use serde_json::json;
 use tokio::sync::broadcast::Sender;
+
+use crate::{auth::Claims, users::PubUserInfo};
+
+use super::{
+    database::{RoomError, RoomManage},
+    CreateRoom, Room, RoomInfo,
+};
 
 pub struct RoomServices<'a, T>
 where
@@ -44,7 +45,7 @@ where
 
     pub fn get_owner_room_info(&self, claims: Claims) -> Result<Vec<RoomInfo>, RoomError> {
         let room_owner_id = claims.get_user_id();
-        let rooms = self.room_db.get_owner_rooms(room_owner_id).map_err(|e|e)?;
+        let rooms = self.room_db.get_owner_rooms(room_owner_id).map_err(|e| e)?;
         Ok(rooms)
     }
 

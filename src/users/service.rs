@@ -7,9 +7,9 @@ use http::StatusCode;
 use serde_json::json;
 use sqlx::Error;
 
-use crate::{
-    database::users_db::{UserDataViewer, UserDbManage},
-    models::user_model::{CreateUserPayload, PubUserInfo, User},
+use super::{
+    database::{UserDataViewer, UserDbManage},
+    CreateUserPayload, PubUserInfo, User,
 };
 
 pub struct UserServices<'a, T>

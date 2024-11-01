@@ -5,7 +5,9 @@ use jsonwebtoken::{DecodingKey, EncodingKey};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-use super::user_model::PubUserInfo;
+use crate::users::PubUserInfo;
+
+pub mod services;
 
 // クライアントから送られる認証情報
 #[derive(Debug, Deserialize, Validate)]

@@ -3,7 +3,7 @@ use futures::{SinkExt, StreamExt};
 use tokio::sync::broadcast::Sender;
 use tracing::warn;
 
-use crate::models::{chat_model::Chat, user_model::PubUserInfo};
+use crate::{chat::Chat, users::PubUserInfo};
 
 pub struct ChatServices {
     socket: WebSocket,

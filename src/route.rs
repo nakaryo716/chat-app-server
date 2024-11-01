@@ -10,15 +10,17 @@ use http::{
 use tower_http::cors::CorsLayer;
 
 use crate::{
+    auth::services::AuthError,
     handlers::{
-        auth_handlers::login,
-        chat_handler::chat_handler_with_upgrade,
-        room_handlers::{
-            create_room_handler, delete_room_handler, get_all_room_info_handler, get_owner_room_handler, get_specific_room_info
+        auth::login,
+        chat::chat_handler_with_upgrade,
+        room::{
+            create_room_handler, delete_room_handler, get_all_room_info_handler,
+            get_owner_room_handler, get_specific_room_info,
         },
-        user_handlers::{add_new_user, delete_user_handle, get_user_info_handle},
+        users::{add_new_user, delete_user_handle, get_user_info_handle},
     },
-    services::{auth::AuthError, user::UserServiciesError},
+    users::service::UserServiciesError,
     AppState,
 };
 

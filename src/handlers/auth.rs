@@ -1,11 +1,16 @@
 use axum::{extract::State, response::IntoResponse};
-use axum_extra::extract::{cookie::{Cookie, SameSite}, CookieJar};
+use axum_extra::extract::{
+    cookie::{Cookie, SameSite},
+    CookieJar,
+};
 use http::StatusCode;
 
 use crate::{
-    database::users_db::UserDb,
-    models::auth_model::AuthPayload,
-    services::auth::{AuthError, AuthorizeServices, COOKIEKEY},
+    auth::{
+        services::{AuthError, AuthorizeServices, COOKIEKEY},
+        AuthPayload,
+    },
+    users::database::UserDb,
     util::ValidatedJson,
 };
 

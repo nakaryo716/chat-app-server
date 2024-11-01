@@ -306,34 +306,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "chat-api"
-version = "0.1.0"
-dependencies = [
- "argon2",
- "async-trait",
- "axum",
- "axum-extra",
- "axum-server",
- "chrono",
- "dotenvy",
- "futures",
- "http",
- "jsonwebtoken",
- "once_cell",
- "rand",
- "serde",
- "serde_json",
- "sqlx",
- "thiserror",
- "tokio",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "uuid",
- "validator",
-]
-
-[[package]]
 name = "chrono"
 version = "0.4.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2681,3 +2653,31 @@ name = "zeroize"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ced3678a2879b30306d323f4542626697a464a97c0a07c9aebf7ebca65cd4dde"
+
+[[package]]
+name = "zircon"
+version = "0.1.0"
+dependencies = [
+ "argon2",
+ "async-trait",
+ "axum",
+ "axum-extra",
+ "axum-server",
+ "chrono",
+ "dotenvy",
+ "futures",
+ "http",
+ "jsonwebtoken",
+ "once_cell",
+ "rand",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+ "validator",
+]

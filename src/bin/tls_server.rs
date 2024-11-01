@@ -1,18 +1,13 @@
 use std::net::SocketAddr;
 
 use axum_server::tls_openssl::OpenSSLConfig;
+use zircon::{room::database::RoomDb, route::app, users::database::UserDb, AppError, AppState};
 use tracing::info;
-
-use chat_api::{
-    database::{rooms_db::RoomDb, users_db::UserDb},
-    route::app,
-    AppError, AppState,
-};
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    
+
     let config = OpenSSLConfig::from_pem_file("./signed-certs/cert.pem", "./signed-certs/key.pem")
         .expect("must set");
 

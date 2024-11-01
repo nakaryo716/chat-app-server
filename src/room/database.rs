@@ -1,10 +1,3 @@
-use crate::{
-    models::{
-        rooms_model::{Room, RoomInfo},
-        user_model::PubUserInfo,
-    },
-    AppState,
-};
 use axum::extract::FromRef;
 use chrono::Utc;
 use std::{
@@ -13,6 +6,10 @@ use std::{
 };
 use tokio::sync::broadcast;
 use uuid::Uuid;
+
+use crate::{users::PubUserInfo, AppState};
+
+use super::{Room, RoomInfo};
 
 // ユーザーが開設したチャットルームのメタ情報及びtokio::bradcastのチャンネルを保持して使えるようにする構造体
 #[derive(Debug, Clone)]
