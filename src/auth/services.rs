@@ -11,13 +11,9 @@ use jsonwebtoken::{decode, encode, Header, Validation};
 use once_cell::sync::Lazy;
 use serde_json::json;
 
-use crate::{
-    database::users_db::UserDataViewer,
-    models::{
-        auth_model::{AccsessToken, AuthPayload, Claims, Keys},
-        user_model::{PubUserInfo, User},
-    },
-};
+use crate::users::{database::UserDataViewer, PubUserInfo, User};
+
+use super::{AccsessToken, AuthPayload, Claims, Keys};
 
 static SECRETKEYS: Lazy<Keys> = Lazy::new(|| {
     let secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");

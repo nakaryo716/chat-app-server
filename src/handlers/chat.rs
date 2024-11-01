@@ -5,11 +5,11 @@ use axum::Json;
 use serde_json::json;
 use tracing::warn;
 
-use crate::database::rooms_db::RoomDb;
-use crate::models::auth_model::Claims;
-use crate::models::user_model::PubUserInfo;
-use crate::services::chat_ws::ChatServices;
-use crate::services::rooms::RoomServices;
+use crate::auth::Claims;
+use crate::chat::services::ChatServices;
+use crate::room::database::RoomDb;
+use crate::room::services::RoomServices;
+use crate::users::PubUserInfo;
 
 pub async fn chat_handler_with_upgrade(
     claims: Claims,

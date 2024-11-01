@@ -3,7 +3,10 @@ use sqlx::prelude::FromRow;
 use uuid::Uuid;
 use validator::Validate;
 
-use super::auth_model::Claims;
+use crate::auth::Claims;
+
+pub mod database;
+pub mod service;
 
 #[derive(Debug, Clone, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -38,16 +41,20 @@ impl User {
     pub fn get_user_id(&self) -> &str {
         &self.user_id
     }
+
     pub fn get_user_name(&self) -> &str {
         &self.user_name
     }
+
     pub fn get_user_mail(&self) -> &str {
         &self.user_mail
     }
+
     pub fn get_user_pass(&self) -> &str {
         &self.user_pass
     }
 }
+
 #[derive(Debug, Clone, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct PubUserInfo {

@@ -5,11 +5,12 @@ use axum::{
 };
 use http::StatusCode;
 
-use crate::{
-    database::rooms_db::{RoomDb, RoomError},
-    models::{auth_model::Claims, rooms_model::CreateRoom, user_model::PubUserInfo},
-    services::rooms::RoomServices,
-    util::ValidatedJson,
+use crate::{auth::Claims, users::PubUserInfo, util::ValidatedJson};
+
+use crate::room::{
+    database::{RoomDb, RoomError},
+    services::RoomServices,
+    CreateRoom,
 };
 
 pub async fn create_room_handler(

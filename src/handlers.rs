@@ -1,5 +1,4 @@
-// routerから参照される実装群
-pub mod auth_handlers;
-pub mod chat_handler;
-pub mod room_handlers;
-pub mod user_handlers;
+pub mod auth;
+pub mod chat;
+pub mod room;
+pub mod users;

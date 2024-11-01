@@ -1,10 +1,5 @@
+use zircon::{room::database::RoomDb, route::app, users::database::UserDb, AppError, AppState};
 use tracing::info;
-
-use chat_api::{
-    database::{rooms_db::RoomDb, users_db::UserDb},
-    route::app,
-    AppError, AppState,
-};
 
 #[tokio::main]
 async fn main() {

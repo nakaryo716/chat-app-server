@@ -1,9 +1,9 @@
-use crate::{
-    models::user_model::{PubUserInfo, User},
-    AppState,
-};
 use axum::{async_trait, extract::FromRef};
 use sqlx::PgPool;
+
+use crate::AppState;
+
+use super::{PubUserInfo, User};
 
 #[derive(Debug, Clone)]
 pub struct UserDb {
@@ -137,8 +137,9 @@ impl FromRef<AppState> for UserDb {
 
 #[cfg(test)]
 mod test {
+    use crate::users::CreateUserPayload;
+
     use super::*;
-    use crate::models::user_model::CreateUserPayload;
     use rand::random;
 
     async fn set_up_db() -> UserDb {

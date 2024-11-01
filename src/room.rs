@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::Sender;
 use validator::Validate;
 
+pub mod database;
+pub mod services;
+
 #[derive(Debug, Clone, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateRoom {

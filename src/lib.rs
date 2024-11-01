@@ -1,12 +1,14 @@
+use auth::services::AuthError;
 use axum::response::IntoResponse;
-use database::{rooms_db::RoomDb, users_db::UserDb};
-use services::{auth::AuthError, user::UserServiciesError};
+use room::database::RoomDb;
+use users::{database::UserDb, service::UserServiciesError};
 
-pub mod database;
-mod handlers;
-mod models;
+mod auth;
+mod chat;
+pub mod handlers;
+pub mod room;
 pub mod route;
-mod services;
+pub mod users;
 mod util;
 
 #[derive(Debug, Clone)]

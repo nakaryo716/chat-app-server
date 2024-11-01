@@ -3,14 +3,14 @@ use axum_extra::extract::{cookie::Cookie, CookieJar};
 use http::StatusCode;
 
 use crate::{
-    database::users_db::UserDb,
-    models::{
-        auth_model::{AuthPayload, Claims},
-        user_model::{CreateUserPayload, PubUserInfo},
+    auth::{
+        services::{AuthError, AuthorizeServices, COOKIEKEY},
+        AuthPayload, Claims,
     },
-    services::{
-        auth::{AuthError, AuthorizeServices, COOKIEKEY},
-        user::{UserServices, UserServiciesError},
+    users::{
+        database::UserDb,
+        service::{UserServices, UserServiciesError},
+        CreateUserPayload, PubUserInfo,
     },
     util::ValidatedJson,
 };
