@@ -1,3 +1,7 @@
+# 注意
+ここにある証明書はオレオレ証明書(self signed)です  
+警告され、実際には使うことはできません  
+
 # TLS認証(keyとcertの作成方法)
 opensslを使用します  
 server.crt, server.key, server.passwordが最終的に必要です  
