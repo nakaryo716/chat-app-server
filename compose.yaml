@@ -1,10 +1,23 @@
 services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - 180:80
+      - 1443:443
+    networks: 
+      - "chat-network"  
   app:
     build: 
       dockerfile: Dockerfile
       context: .
+    working_dir: /app
+    volumes:
+      - .:/app
     ports:
       - '8080:8080'
+    command: make
     networks: 
       - "chat-network"
     tty: true
