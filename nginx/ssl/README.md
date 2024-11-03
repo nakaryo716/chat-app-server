@@ -1,5 +1,10 @@
+# 注意
+ここにある証明書はオレオレ証明書(self signed)です  
+警告され、実際には使うことはできません  
+
 # TLS認証(keyとcertの作成方法)
 opensslを使用します  
+server.crt, server.key, server.passwordが最終的に必要です  
 ## 1. 秘密鍵の作成
 秘密鍵の生成  
 パスワードを聞かれるので、任意のパスワードを決める
@@ -38,19 +43,13 @@ An optional company name []: hogehoge　
 ```
 openssl x509 -in server.csr -days 365000 -req -signkey server.key > server.crt
 ```
-
-## 4. pem形式への変換
-### key
-- 構文
-    ```
-    openssl rsa -in <path-to-key-file> -text <path-to-PEM-file>
-    ```
-- 実例
-    ```
-    openssl rsa -in server.key -text > key.pem
-    ```
-### cert
-certからpemに変換
+## 4. パスワード
+設定したパスワードをechoでファイルに書き込む  
 ```
-sudo openssl x509 -inform der -in server.crt -out cert.pem
+構文  
+echo {パスワード} > server.password
+```
+
+```
+echo pass_word > server.password
 ```
