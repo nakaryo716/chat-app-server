@@ -1,4 +1,4 @@
-use zircon::{room::database::RoomDb, route::app, users::database::UserDb, AppError, AppState};
+use chat_app_api::{room::database::RoomDb, route::app, users::database::UserDb, AppError, AppState};
 use tracing::info;
 
 #[tokio::main]
