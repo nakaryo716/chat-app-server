@@ -44,7 +44,7 @@ WebSocketを使用し、リアルタイムチャットを実現します。最�
 このAPIとnextjsを使った実際のアプリケーションは以下のリポジトリから取得し、実行することができます。  
 Nginxを使用してリバースプロキシでTLS通信を行い、クライアントとサーバーでクロスオリジンリソースシェアリングを行います
 
-実行方法については(https://github.com/nakaryo716/chat-app-proxy-example)の```アプリケーションの全体の実行```を参照してください
+実行方法については[chat-app-proxy-example](https://github.com/nakaryo716/chat-app-proxy-example)の```アプリケーションの全体の実行```を参照してください
 
 ## API Endpoints
 ### ユーザー登録
