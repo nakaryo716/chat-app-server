@@ -7,7 +7,7 @@ WebSocketを使用し、リアルタイムチャットを実現します。最�
 - WebSocketを使用したリアルタイム通信
 - シンプルなAPI設計
 - JWTを使用した認証
-## Getting Started
+## Run Server
 ### Prerequisites
 以下のソフトウェアが必要です:
 - [Docker](https://www.docker.com/)
@@ -17,38 +17,35 @@ WebSocketを使用し、リアルタイムチャットを実現します。最�
     git clone https://github.com/nakaryo716/chat-app-server
     cd chat-app-server
     ```
-2. SSL証明書の作成を行います:  
-```./nginx/ssl/README.md```を参照し、OpenSSLを使用して証明書を作成します。
+2. ```.env```ファイルのALLOW_ORIGINのIPアドレスを自身のコンピュータのIPアドレスに修正してください
+    ```
+    ALLOW_ORIGIN=https://192.168.0.1
+    ```
 3. Dockerコンテナを立ち上げます:  
     ```bash
     docker compose up
     ```
-4. nginx, app, dbコンテナが起動し、APIが使用可能になります。デフォルトではhttps://localhost:1443でアクセス可能です。  
-変更したい場合(https://localhost:443)は```compose.yaml```の```port```を変更してください。  
-port
+4. app, dbコンテナが起動し、APIが使用可能になります
     ```
     container name: port
     ------------------------
-    nginx         : 1443, 180
     app           : 8080
     db            : 15432
     ```
 ## Sample Client Application
-このAPIとnextjsを使った実際のアプリケーションは以下のリポジトリから取得し、実行することができます。  
-**最初にAPI側のコンテナを起動してください**
+![img](./imgs/home.png)
+![img](./imgs/user.png)
+![img](./imgs/login.png)
+![img](./imgs/chat_room.png)
+![img](./imgs/chat_room_reader.png)
+![img](./imgs/chat.png)
 
-chat-appリポジトリのclone
-```bash
-git clone https://github.com/nakaryo716/chat-app
-```
-```bash
-cd chat-app
-```
-dockerコンテナの起動
-```
-docker compose up
-```
-クライアントアプリの起動の仕方については[README.md](https://github.com/nakaryo716/chat-app/blob/main/README.md)を参照してください。
+
+このAPIとnextjsを使った実際のアプリケーションは以下のリポジトリから取得し、実行することができます。  
+Nginxを使用してリバースプロキシでTLS通信を行い、クライアントとサーバーでクロスオリジンリソースシェアリングを行います
+
+実行方法については(https://github.com/nakaryo716/chat-app-proxy-example)の```アプリケーションの全体の実行```を参照してください
+
 ## API Endpoints
 ### ユーザー登録
 Method: ```POST```  
