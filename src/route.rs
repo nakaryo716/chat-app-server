@@ -1,16 +1,14 @@
 use axum::{
-    response::IntoResponse,
     routing::{get, post},
     Router,
 };
 use http::{
-    header::{ACCESS_CONTROL_ALLOW_CREDENTIALS, ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_TYPE},
+    header::{ACCESS_CONTROL_ALLOW_CREDENTIALS, ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_TYPE},
     HeaderValue, Method,
 };
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    auth::services::AuthError,
     handlers::{
         auth::login,
         chat::chat_handler_with_upgrade,
@@ -20,15 +18,11 @@ use crate::{
         },
         users::{add_new_user, delete_user_handle, get_user_info_handle},
     },
-    users::service::UserServiciesError,
     AppState,
 };
 
 // ルーティング処理の実装
-pub fn app<E>(app_state: AppState, origin: Vec<String>) -> Router
-where
-    E: IntoResponse + From<AuthError> + From<UserServiciesError> + 'static,
-{
+pub fn app(app_state: AppState, origin: Vec<String>) -> Router {
     let origins: Vec<HeaderValue> = origin
         .iter()
         .map(|e| e.parse::<HeaderValue>().unwrap())
@@ -39,7 +33,7 @@ where
             "/user",
             post(add_new_user)
                 .get(get_user_info_handle)
-                .delete(delete_user_handle::<E>),
+                .delete(delete_user_handle),
         )
         .route("/login", post(login))
         .route(
@@ -60,7 +54,9 @@ where
                 .allow_headers([
                     CONTENT_TYPE,
                     ACCESS_CONTROL_ALLOW_ORIGIN,
+                    ACCESS_CONTROL_ALLOW_HEADERS,
                     ACCESS_CONTROL_ALLOW_CREDENTIALS,
+                    ACCESS_CONTROL_ALLOW_METHODS,
                 ])
                 .allow_methods([
                     Method::POST,

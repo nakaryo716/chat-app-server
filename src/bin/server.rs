@@ -1,4 +1,4 @@
-use chat_app_api::{room::database::RoomDb, route::app, users::database::UserDb, AppError, AppState};
+use chat_app_api::{route::app, AppState, RoomDb, UserDb};
 use tracing::info;
 
 #[tokio::main]
@@ -15,7 +15,7 @@ async fn main() {
     let room_db = RoomDb::new();
 
     let app_state = AppState::new(room_db, user_db);
-    let app = app::<AppError>(app_state, origins);
+    let app = app(app_state, origins);
 
     axum::serve(listener, app).await.unwrap();
 }
