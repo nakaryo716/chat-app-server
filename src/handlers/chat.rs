@@ -5,19 +5,22 @@ use axum::Json;
 use serde_json::json;
 use tracing::warn;
 
-use crate::auth::Claims;
-use crate::chat::services::ChatServices;
-use crate::room::database::RoomDb;
-use crate::room::services::RoomServices;
-use crate::users::PubUserInfo;
+use crate::domain::entity::claims::Claims;
+use crate::domain::entity::pub_user_info::PubUserInfo;
+use crate::domain::service::chat_service::ChatServices;
+use crate::domain::service::room_service::RoomServices;
+use crate::infrastructure::repository::room_repository_impl::RoomRepositoryImpl;
+use crate::RoomDb;
 
 pub async fn chat_handler_with_upgrade(
     claims: Claims,
     Path(room_id): Path<String>,
-    State(room_db): State<RoomDb>,
+    State(repo): State<RoomDb>,
     ws: WebSocketUpgrade,
 ) -> impl IntoResponse {
-    let room_sender = match RoomServices::new(&room_db).get_sender(&room_id) {
+    let service = RoomServices::new(RoomRepositoryImpl::new(repo));
+
+    let room_sender = match service.get_sender(&room_id) {
         Ok(sender) => sender,
         Err(_) => {
             let body = Json(json!({
@@ -26,7 +29,10 @@ pub async fn chat_handler_with_upgrade(
             return (StatusCode::NOT_FOUND, body).into_response();
         }
     };
-    let user_info = PubUserInfo::from(claims);
+    let user_info = PubUserInfo {
+        user_id: claims.user_id,
+        user_name: claims.user_name,
+    };
 
     ws.on_failed_upgrade(|e| warn!("websocket upgrade error {}", e))
         .on_upgrade(move |socket| {
